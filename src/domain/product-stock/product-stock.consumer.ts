@@ -1,19 +1,22 @@
-import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
 import { ProductStockService } from './product-stock.service';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { CreateProductStockMessageDTO } from './rabbitmq_dto/createProductStockMessageDTO';
 
-@Controller()
+@Injectable()
 export class ProductStockConsumer {
   constructor(private productStockService: ProductStockService) {}
-  @MessagePattern('product_created_queue')
-  async handleProductCreation(@Payload() message: any) {
-    console.log(message);
-    const newProductStockDTO = new CreateProductStockMessageDTO();
-    newProductStockDTO.product_id = message;
-    newProductStockDTO.amount = 0;
-    const newProductStock =
-      await this.productStockService.createProductStock(newProductStockDTO);
-    console.log(newProductStock);
+  @RabbitSubscribe({
+    exchange: 'exchange_1',
+    routingKey: 'product.created',
+    queue: 'product_created_queue',
+  })
+  public async handleProductCreated(msg: any, amqpMsg: any) {
+    console.log(`Received message: ${JSON.stringify(msg)}`);
+    const productStockDTO = new CreateProductStockMessageDTO();
+    productStockDTO.product_id = msg.data;
+    productStockDTO.amount = 0;
+    const result = await this.productStockService.createProductStock(productStockDTO);
+    console.log(result);
   }
 }

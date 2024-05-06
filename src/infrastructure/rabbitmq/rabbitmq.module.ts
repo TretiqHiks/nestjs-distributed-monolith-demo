@@ -1,29 +1,26 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { RabbitmqService } from './rabbitmq.service';
-import { RabbitMQConfig } from './rabbitmq.config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ProductStockConsumer } from '../../domain/product-stock/product-stock.consumer';
-import { ProductStockModule } from '../../domain/product-stock/product-stock.module';
+// rabbitmq.module.ts
+import { Module, Global } from '@nestjs/common';
+import { RabbitMQModule as NestRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { RabbitMQService } from './rabbitmq.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
+@Global()
 @Module({
   imports: [
-    ConfigModule,
-    ClientsModule.registerAsync([
-      {
-        name: 'PRODUCT_SERVICE',
-        imports: [RabbitMQModule],
-        useFactory: async (rabbitMQConfig: RabbitMQConfig) => ({
-          transport: Transport.RMQ,
-          options: rabbitMQConfig.getRmqOptions().options,
-        }),
-        inject: [RabbitMQConfig],
-      },
-    ]),
-    ProductStockModule,
+    NestRabbitMQModule.forRootAsync(NestRabbitMQModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        exchanges: [{ name: 'exchange_1', type: 'topic' }],
+        uri: configService.get<string>(
+          'RMQ_URL',
+          'amqp://default:default@localhost:5672',
+        ),
+        connectionInitOptions: { wait: false },
+      }),
+      inject: [ConfigService],
+    }),
   ],
-  providers: [RabbitmqService, RabbitMQConfig],
-  controllers: [ProductStockConsumer],
-  exports: [RabbitmqService, RabbitMQConfig],
+  providers: [RabbitMQService],
+  exports: [NestRabbitMQModule, RabbitMQService],
 })
 export class RabbitMQModule {}

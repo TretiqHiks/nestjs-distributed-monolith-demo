@@ -22,12 +22,13 @@ export class ProductStockService {
   async createProductStock(
     createProductStockDTO: CreateProductStockMessageDTO,
   ) {
-    return await this.productStockRepository.saveProductStock(
+    const result = await this.productStockRepository.saveProductStock(
       createProductStockDTO,
     );
+    return result;
   }
 
-  async addAmountToStock(product_id: string, amountToAdd: number){
+  async addAmountToStock(product_id: string, amountToAdd: number) {
     const productStock = await this.productStockRepository.addAmountToStock(
       product_id,
       amountToAdd,

@@ -1,32 +1,15 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ClientProxy, ClientProxyFactory } from '@nestjs/microservices';
-import { RabbitMQConfig } from './rabbitmq.config';
+// rabbitmq.service.ts
+import { Injectable } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
-export class RabbitmqService implements OnModuleInit, OnModuleDestroy {
-  private client: ClientProxy;
+export class RabbitMQService {
+  constructor(private readonly amqpConnection: AmqpConnection) {}
 
-  constructor(private rabbitMQConfig: RabbitMQConfig) {}
+  public async publish(routing_key: string, message: any) {
+    const messageObject =
+      typeof message === 'object' ? message : { data: message };
 
-  onModuleInit() {
-    const rmqOptions = this.rabbitMQConfig.getRmqOptions();
-    this.client = ClientProxyFactory.create(rmqOptions);
-    this.connect();
-  }
-
-  private async connect() {
-    try {
-      await this.client.connect();
-    } catch (error) {
-      console.error('Error connecting to RabbitMQ:', error);
-    }
-  }
-
-  async send(pattern: string, data: any): Promise<any> {
-    return this.client.send(pattern, data).toPromise();
-  }
-
-  async onModuleDestroy() {
-    await this.client.close();
+    await this.amqpConnection.publish('exchange_1', routing_key, messageObject);
   }
 }

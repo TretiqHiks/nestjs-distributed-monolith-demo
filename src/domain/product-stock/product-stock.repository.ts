@@ -14,7 +14,9 @@ export class ProductStockRepository {
   async saveProductStock(
     createProductStockMessageDTO: CreateProductStockMessageDTO,
   ): Promise<ProductStock> {
-    const newProductStock = this.productStockRepository.create(createProductStockMessageDTO);
+    const newProductStock = this.productStockRepository.create(
+      createProductStockMessageDTO,
+    );
     await this.productStockRepository.save(newProductStock);
     return newProductStock;
   }
@@ -30,8 +32,6 @@ export class ProductStockRepository {
     addAmount: number,
   ): Promise<ProductStock> {
     const productStock = await this.getProductStockByProductId(product_id);
-    console.log(product_id);
-    console.log(productStock);
     productStock.amount += addAmount;
     return this.productStockRepository.save(productStock);
   }

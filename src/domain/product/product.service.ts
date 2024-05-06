@@ -3,19 +3,19 @@ import { createProductDTO } from './dto/createProductDTO';
 import { ProductRepository } from './product.repository';
 import { GetAllProductsDTO } from './dto/getAllProductsDTO';
 import { GetProductDTO } from './dto/getProductDTO';
-import { RabbitmqService } from '../../infrastructure/rabbitmq/rabbitmq.service';
+import { RabbitMQService } from '../../infrastructure/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
-    private readonly rabbitMqService: RabbitmqService,
+    private readonly rabbitMqService: RabbitMQService,
   ) {}
   async createProduct(createProductDTO: createProductDTO) {
     try {
       const product =
         await this.productRepository.saveProduct(createProductDTO);
-      this.rabbitMqService.send('product_created_queue', product.id);
+      await this.rabbitMqService.publish('product.created', product.id);
       return product;
     } catch (error) {
       console.log(error);

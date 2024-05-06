@@ -10,8 +10,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createProductDTO } from './dto/createProductDTO';
 import { ProductService } from './product.service';
-import { response, Response } from 'express';
-import { Product } from '../models/product.entity';
+import { Response } from 'express';
 
 @Controller('product')
 export class ProductController {
