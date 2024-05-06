@@ -1,4 +1,3 @@
-// rabbitmq.module.ts
 import { Module, Global } from '@nestjs/common';
 import { RabbitMQModule as NestRabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { RabbitMQService } from './rabbitmq.service';

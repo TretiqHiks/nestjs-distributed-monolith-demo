@@ -1,4 +1,3 @@
-// rabbitmq.service.ts
 import { Injectable } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
